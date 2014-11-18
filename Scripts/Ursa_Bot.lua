@@ -31,25 +31,28 @@ function BuyStartingItems(player)
 end
 
 function Tick(tick)
-  if not PlayingGame() then return end
+  if client.loading then return end
   if not SleepCheck() then return end Sleep(200)
-    if client.gameState == Client.STATE_PICK then
-      client:ExecuteCmd("dota_select_hero npc_dota_hero_ursa")
-      currentLevel = 0
-      state = 1
-      return
-    end
-    local me = entityList:GetMyHero()
-    if PlayingGame and me.alive then
-      if currentLevel == 0 then
-        if me.team == LuaEntity.TEAM_DIRE then
-          StartPos = Vector(-333, 4880, 496)
-          SpawnPos = Vector(7050, 6380, 496)
-        elseif me.team == LuaEntity.TEAM_RADIANT then
-          StartPos = Vector(256, -2346, 496)
-          SpawnPos = Vector(-7077,-6780,496)
-        end
+  
+  if client.gameState == Client.STATE_PICK then
+    client:ExecuteCmd("dota_select_hero npc_dota_hero_ursa")
+    currentLevel = 0
+    state = 1
+    return
+  end
+  
+  local me = entityList:GetMyHero()
+  
+  if PlayingGame and me.alive then
+    if currentLevel == 0 then
+      if me.team == LuaEntity.TEAM_DIRE then
+        StartPos = Vector(-333, 4880, 496)
+        SpawnPos = Vector(7050, 6380, 496)
+      elseif me.team == LuaEntity.TEAM_RADIANT then
+        StartPos = Vector(256, -2346, 496)
+        SpawnPos = Vector(-7077,-6780,496)
       end
+    end
     
     if currentLevel ~= me.level then
       local ability = me.abilities
