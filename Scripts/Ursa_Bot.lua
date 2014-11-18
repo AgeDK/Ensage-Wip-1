@@ -14,6 +14,8 @@ local levels = {3,2,3,2,1,4,1,1,1,2,2,3,3,4,5,4,5,5,5,5,5,5,5,5,5}
 -- Buy a salve, tango and stout shield
 local startingItems = {44, 182, 39}
 
+startJunglingTime = 29
+
 -- Check player is level one, then buy all the starting items we need to JUNGLLEEEEEE
 function BuyStartingItems(player)
   level = player.level
@@ -56,3 +58,6 @@ function Tick(tick)
   if me.health == me.maxHealth and inStartPosition == false and state >= 3 then
     me:Move(StartPos)
     inStartPosition = true
+    Sleep(500)
+    return
+  end
