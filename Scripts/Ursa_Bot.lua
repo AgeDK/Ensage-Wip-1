@@ -8,6 +8,7 @@ require("libs.ScriptConfig")
 -- Script config, hotkeys, levelling etc
 local config = ScriptConfig.new()
 config:SetParameter("minHealth", 150)
+config:SetParameter("Test", "L", config.TYPE_HOTKEY)
 config:Load()
 local currentLevel = 0
 local state = 1
@@ -72,3 +73,19 @@ function Tick(tick)
     end
   end
 end
+
+
+-- Just a Test
+--test work status of script
+function Key(msg,code)
+  if client.chat or client.console or client.loading then return end
+  if IsKeyDown(config.Test) then
+    local me = entityList:GetMyHero()
+    client:ExecuteCmd("say state = "..state.." inPosition = "..(inPosition and 1 or 0).."TIME ="..client.gameTime)
+    print("X="..client.mousePosition.x.."; Y="..client.mousePosition.y.."; Team="..me.team)
+  end
+end
+
+
+script:RegisterEvent(EVENT_TICK,Tick)
+script:RegisterEvent(EVENT_KEY,Key)
