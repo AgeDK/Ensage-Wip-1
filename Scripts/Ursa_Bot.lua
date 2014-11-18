@@ -36,28 +36,37 @@ function Tick(tick)
       state = 1
       return
     end
-  local me = entityList:GetMyHero()
-  if PlayingGame and me.alive then
-    if currentLevel = 0 then
-      if me.team == LuaEntity.TEAM_DIRE then
-        StartPos = Vector(-333, 4880, 496)
-        SpawnPos = Vector(7050, 6380, 496)
-      elseif me.team = LuaEntity.TEAM_RADIANT then
-        StartPos = Vector(256, -2346, 496)
-        SpawnPos = Vector(-7077,-6780,496)
+    local me = entityList:GetMyHero()
+    if PlayingGame and me.alive then
+      if currentLevel = 0 then
+        if me.team == LuaEntity.TEAM_DIRE then
+          StartPos = Vector(-333, 4880, 496)
+          SpawnPos = Vector(7050, 6380, 496)
+        elseif me.team = LuaEntity.TEAM_RADIANT then
+          StartPos = Vector(256, -2346, 496)
+          SpawnPos = Vector(-7077,-6780,496)
+        end
       end
-    end
     
     if currentLevel ~= me.level then
       local ability = me.abilities
       local prev = SelectUnit(me)
       entityList:GetMyPlayer():LearnAbility(me:GetAbilitylevels[me.level]))
-    SelectBack(prev)
-  end
+      SelectBack(prev)
+    end
   
-  if me.health == me.maxHealth and inStartPosition == false and state >= 3 then
-    me:Move(StartPos)
-    inStartPosition = true
-    Sleep(500)
-    return
+    if me.health == me.maxHealth and inStartPosition == false and state >= 3 then
+      me:Move(StartPos)
+      inStartPosition = true
+      Sleep(500)
+      return
+    end
+  
+    if state == 2 and me:FindItem("item_tango" and me:FindItem("item_flask") and me:FindItem("item_stout_shield") then
+      if inStartPosition == false then
+        me:Move(StartPos)
+      end
+      state = 3
+    end
   end
+end
