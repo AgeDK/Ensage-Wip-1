@@ -7,6 +7,8 @@ require("libs.ScriptConfig")
 
 -- Script config, hotkeys, levelling etc
 local config = ScriptConfig.new()
+config:SetParameter("minHealth", 150)
+config:Load()
 local currentLevel = 0
 local state = 1
 local inStartPosition = false
