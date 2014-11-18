@@ -32,6 +32,7 @@ end
 
 function Tick(tick)
   if client.loading then return end
+  if not PlayingGame() or client.paused then return end
   if not SleepCheck() then return end Sleep(200)
   
   if client.gameState == Client.STATE_PICK then
@@ -83,13 +84,12 @@ end
 
 
 -- Just a Test
---test work status of script
 function Key(msg,code)
   if client.chat or client.console or client.loading then return end
   if IsKeyDown(config.Test) then
     local me = entityList:GetMyHero()
     client:ExecuteCmd("say state = "..state.." inPosition = "..(inPosition and 1 or 0).."TIME ="..client.gameTime)
-    print("X="..client.mousePosition.x.."; Y="..client.mousePosition.y.."; Team="..me.team)
+    print("X="..client.mousePosition.x.."; Y="..client.mousePosition.y.."; Team="..me.team;"Hero Position="..me.position)
   end
 end
 
