@@ -32,7 +32,7 @@ end
 function Tick(tick)
   if not PlayingGame() then return end
   if not SleepCheck() then return end Sleep(200)
-    if client.gameState = Client.STATE_PICK then
+    if client.gameState == Client.STATE_PICK then
       client:ExecuteCmd("dota_select_hero npc_dota_hero_ursa")
       currentLevel = 0
       state = 1
