@@ -53,7 +53,7 @@ function Tick(tick)
     if currentLevel ~= me.level then
       local ability = me.abilities
       local prev = SelectUnit(me)
-      entityList:GetMyPlayer():LearnAbility(me:GetAbilitylevels[me.level]))
+      entityList:GetMyPlayer():LearnAbility(me:GetAbility(levels[me.level]))
       SelectBack(prev)
     end
   
