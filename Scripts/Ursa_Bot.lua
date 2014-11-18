@@ -60,13 +60,6 @@ function Tick(tick)
       entityList:GetMyPlayer():LearnAbility(me:GetAbility(levels[me.level]))
       SelectBack(prev)
     end
-  
-    if me.health == me.maxHealth and inStartPosition == false and state >= 3 then
-      me:Move(StartPos)
-      inStartPosition = true
-      Sleep(500)
-      return
-    end
     
     if state == 1 then
       BuyStartingItems(me)
@@ -75,9 +68,16 @@ function Tick(tick)
     if state == 2 and me:FindItem("item_tango") and me:FindItem("item_flask") and me:FindItem("item_stout_shield") then
       if inStartPosition == false then
         me:Move(StartPos)
+        inStartPosition == true
       end
       state = 3
     end
+    
+    -- TODO Start farming!!
+    if me.health == me.maxHealth and inStartPosition == true and state == 3 then
+      -- Start farming here
+    end
+    
   end
 end
 
