@@ -40,7 +40,7 @@ function Tick(tick)
     end
     local me = entityList:GetMyHero()
     if PlayingGame and me.alive then
-      if currentLevel = 0 then
+      if currentLevel == 0 then
         if me.team == LuaEntity.TEAM_DIRE then
           StartPos = Vector(-333, 4880, 496)
           SpawnPos = Vector(7050, 6380, 496)
