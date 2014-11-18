@@ -44,7 +44,7 @@ function Tick(tick)
         if me.team == LuaEntity.TEAM_DIRE then
           StartPos = Vector(-333, 4880, 496)
           SpawnPos = Vector(7050, 6380, 496)
-        elseif me.team = LuaEntity.TEAM_RADIANT then
+        elseif me.team == LuaEntity.TEAM_RADIANT then
           StartPos = Vector(256, -2346, 496)
           SpawnPos = Vector(-7077,-6780,496)
         end
