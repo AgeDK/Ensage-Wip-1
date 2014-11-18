@@ -67,6 +67,10 @@ function Tick(tick)
       Sleep(500)
       return
     end
+    
+    if state == 1 then
+      BuyStartingItems(me)
+    end
   
     if state == 2 and me:FindItem("item_tango") and me:FindItem("item_flask") and me:FindItem("item_stout_shield") then
       if inStartPosition == false then
