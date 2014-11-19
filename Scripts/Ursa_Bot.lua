@@ -57,14 +57,17 @@ end
 -- We want to find the jungle creep with the most health. Get that prick out the way first.
 function FindJungleCreep()
 	local lowenemy = nil
-	local enemies = entityList:FindEntities({type=TYPE_CREEP,team=TEAM_NEUTRAL,alive=true,visible=true})
-	for i,v in ipairs(enemies) do  
-		if lowenemy == nil then
-      lowenemy = v
-		elseif (lowenemy.health) < (v.health) then
-      lowenemy = v
-		end
-	end
+	local enemies = entityList:GetEntities({classId=CDOTA_BaseNPC_Creep_Neutral,alive=true,visible=true})
+	for i,v in ipairs(enemies) do
+    if v.spawned then
+      if lowenemy == nil then
+        lowenemy = v
+      elseif (lowenemy.health) < (v.health) then
+        lowenemy = v
+      end
+    end
+  end
+
 	target = lowenemy
   return target
 end
