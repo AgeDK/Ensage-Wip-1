@@ -41,7 +41,7 @@ local levels = {3,2,3,2,1,4,1,1,1,2,2,3,3,4,5,4,5,5,5,5,5,5,5,5,5}
 local startingItems = {44, 182, 39}
 
 -- Camp locations, Hard, Med, Rune, Easy, Lane
-campLocationDire = {Vector(1224, 3593, 496), Vector(391, 3772, 496), Vector(-1441, 2708, 496), Vector(-4286, 3618, 496), Vector(-3043, 4643, 496)}
+campLocationDire = {Vector(-1041, 3511, 496), Vector(-477, 3881, 496), Vector(-1519, 2785, 496), Vector(-3033, 4790, 496), Vector(-4228, 3680, 496)}
 
 -- Config for finding a camp
 target = nil
@@ -78,7 +78,6 @@ end
 function FindCampTarget()
   me:Move(campLocationDire[2])
   FindCreepTarget()
-  
   if target == nil then
     me:Move(campLocationDire[3])
     FindCreepTarget()
@@ -104,11 +103,12 @@ function FindCampTarget()
   else
     foundCamp = true
   end
+  print(foundCamp)
 end
 
         
 function DeliverByCourier()
-  local me = entityList:GetMyHero()
+  me = entityList:GetMyHero()
   local cour = entityList:FindEntities({classId = CDOTA_Unit_Courier,team = me.team,alive = true})[1]
   if cour then
     client:ExecuteCmd("dota_courier_deliver")
@@ -122,7 +122,7 @@ function Tick(tick)
   
   -- Check we're actually in a game and it's not paused and we're not waiting for something
   if client.loading then return end
-  if not PlayingGame() or client.paused then return end
+  if not IsIngame() or client.paused then return end
   if not SleepCheck() then return end Sleep(200)
   
   -- Pick Ursa!
@@ -134,13 +134,13 @@ function Tick(tick)
   end
   
   -- Get our hero so we can access the attributes.
-  local me = entityList:GetMyHero()
+  me = entityList:GetMyHero()
   
   -- Check we're playing, we're spawned in and find out which team we're on.
-  if PlayingGame and me.alive then
+  if PlayingGame() and me.alive then
     if currentLevel == 0 then
       if me.team == LuaEntity.TEAM_DIRE then
-        StartPos = Vector(-333, 4880, 496)
+        StartPos = Vector(-447, 4402, 496)
         SpawnPos = Vector(7050, 6380, 496)
       elseif me.team == LuaEntity.TEAM_RADIANT then
         StartPos = Vector(256, -2346, 496)
@@ -175,21 +175,26 @@ function Tick(tick)
       if client.gameTime >= 30 then
         if foundCamp == false then
           FindCampTarget()
+          me:Attack(target)
+          print("Stuck 1")
         end
       elseif waitForSpawn == true then
         if client.gameTime % 60 ~= 0 then
           me:Move(StartPos)
+          print("Stuck 2")
         else
           waitForSpawn = false
           FindCampTarget()
+          print("Stuck 3")
         end
-      else
+      elseif foundCamp == true then
         me:Attack(target)
+        print("I'm trying to attack!")
       end
     end
       
     -- Let's sort out item purchasing
-    local playerEntity = entityList:getEntities({classId=CDOTA_PlayerResource})[1]
+    local playerEntity = entityList:GetEntities({classId=CDOTA_PlayerResource})[1]
     local gold = playerEntity:GetGold(me.playerId)
     
     -- Let's get a tasty morbid mask!
@@ -219,7 +224,7 @@ function Key(msg,code)
   if IsKeyDown(config.Test) then
     local me = entityList:GetMyHero()
     client:ExecuteCmd("say state = "..state.." inPosition = "..(inPosition and 1 or 0).."TIME ="..client.gameTime)
-    print("X="..client.mousePosition.x.."; Y="..client.mousePosition.y.."; Team="..me.team"; Hero Position="..me.position)
+    print("X="..client.mousePosition.x.."; Y="..client.mousePosition.y.."; Team="..me.team)
   end
 end
 
