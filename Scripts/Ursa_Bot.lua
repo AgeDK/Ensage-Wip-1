@@ -41,7 +41,7 @@ local levels = {3,2,3,2,1,4,1,1,1,2,2,3,3,4,5,4,5,5,5,5,5,5,5,5,5}
 local startingItems = {44, 182, 39}
 
 -- Camp locations, Hard, Med, Rune, Easy, Lane
-campLocationDire = {Vector(-1041, 3511, 496), Vector(-477, 3881, 496), Vector(-1519, 2785, 496), Vector(-3033, 4790, 496), Vector(-4228, 3680, 496)}
+campLocationDire = {Vector(-1041, 3511, 0), Vector(-477, 3881, 0), Vector(-1457, 2909, 0), Vector(-3033, 4790, 0), Vector(-4228, 3680, 0)}
 
 -- Config for finding a camp
 target = nil
@@ -65,7 +65,7 @@ function FindCreepTarget()
   local enemies = entityList:GetEntities({classId=CDOTA_BaseNPC_Creep_Neutral,alive=true,visible=true})
   for i,v in ipairs(enemies) do
     if v.spawned then
-      if lowenemy == nil then
+      if lowenemy == nil or not lowenemy.alive or not lowenemy.visible then
         lowenemy = v
       elseif (lowenemy.maxHealth) < (v.maxHealth) then
         lowenemy = v
@@ -76,27 +76,38 @@ function FindCreepTarget()
 end
 
 function FindCampTarget()
-  me:Move(campLocationDire[2])
   FindCreepTarget()
   if target == nil then
-    me:Move(campLocationDire[3])
+    while GetDistance2D(me, campLocationDire[2]) do
+      me:Move(campLocationDire[2])
+      Sleep(200)
+    end
     FindCreepTarget()
-    
-    if target == nil and me.level >= 2 then
-      me:Move(campLocationDire[1])
+    if target == nil then
+      while GetDistance2D(me, campLocationDire[3]) do
+        me:Move(campLocationDire[3])
+        Sleep(200)
+      end
       FindCreepTarget()
-      
-    elseif target == nil and me.level <= 2 then
-      me:Move(campLocationDire[4])
-      FindCreepTarget()
-      
       if target == nil then
-        me:Move(campLocationDire[5])
+        while GetDistance2D(me, campLocationDire[4]) do
+          me:Move(campLocationDire[4])
+          Sleep(200)
+        end
         FindCreepTarget()
-        
         if target == nil then
-          me:Move(StartPos)
-          waitForSpawn = true
+          while GetDistance2D(me, campLocationDire[5]) do
+            me:Move(campLocationDire[5])
+            Sleep(200)
+          end
+          FindCreepTarget()
+          if target == nil then
+            while GetDistance2D(me, StartPos) do
+              me:Move(StartPos)
+              Sleep(200)
+            end
+            waitForSpawn = true
+          end
         end
       end
     end
@@ -139,11 +150,11 @@ function Tick(tick)
   if PlayingGame() and me.alive then
     if currentLevel == 0 then
       if me.team == LuaEntity.TEAM_DIRE then
-        StartPos = Vector(-447, 4402, 496)
-        SpawnPos = Vector(7050, 6380, 496)
+        StartPos = Vector(-447, 4402, 0)
+        SpawnPos = Vector(7050, 6380, 0)
       elseif me.team == LuaEntity.TEAM_RADIANT then
-        StartPos = Vector(256, -2346, 496)
-        SpawnPos = Vector(-7077,-6780,496)
+        StartPos = Vector(256, -2346, 0)
+        SpawnPos = Vector(-7077,-6780,0)
       end
     end
     
@@ -170,20 +181,25 @@ function Tick(tick)
     end
     
     if inStartPosition == true and state == 3 then
-      -- Once camps spawn go look for a full camp. If all camps are empty then go wait for time to be xx:00 and new camps spawn. Once camps spawn go searching again. If we find a camp then attack the creep.
+      -- Once camps spawn go look for a full camp. If all camps are empty then go wait for time to be xx:00 and new camps spawn. Once camps spawn go searching again. If we find a camp then attack the creep. Once that creep dies attack other creeps in camp. If camp empty, go searching again. 
       if client.gameTime >= 30 then
         if foundCamp == false then
           FindCampTarget()
-          if foundCamp == true then
-            print("Found a camp!")
-            me:Attack(target)
-          elseif waitForSpawn == true then
-            if client.gameTime % 60 ~= 0 then
-              me:Move(StartPos)
-            else
-              waitForSpawn = false
-              FindCampTarget()
-            end
+        elseif foundCamp == true then
+          print("Found a camp!")
+          me:Attack(target)
+          if not target.alive then
+            print("Target died")
+            foundCamp = false
+            target = nil
+            return
+          end
+        elseif waitForSpawn == true then
+          if client.gameTime % 60 ~= 0 then
+            me:Move(StartPos)
+          else
+            waitForSpawn = false
+            FindCampTarget()
           end
         end
       end
@@ -195,14 +211,14 @@ function Tick(tick)
     
     -- Let's get a tasty morbid mask!
     if state == 3 and gold >= 900 then
-      entityList:GetMyPlayer():BuyItem(26)
+      me:BuyItem(26)
       DeliverByCourier()
       state = 4
     end
     
     -- Let's get our smoke
-    if state == 4 and gold >= 100 then
-      entityList:GetMyPlayer():BuyItem(188)
+    if state == 4 and gold > 100 then
+      me:BuyItem(188)
       if me.level == 4 then
         me:Move(SpawnPos)
         state = 6
