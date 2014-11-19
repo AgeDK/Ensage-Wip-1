@@ -43,8 +43,10 @@ local startingItems = {44, 182, 39}
 -- Camp locations, Hard, Med, Rune, Easy, Lane
 campLocationDire = {Vector(1224, 3593), Vector(391, 3772), Vector(-1441, 2708), Vector(-4286, 3618), Vector(-3043, 4643)}
 
--- Creep we are killing
+-- Config for finding a camp
 target = nil
+foundCamp = false
+waitForSpawn = false
 
 -- Check player is level one, then buy all the starting items we need to JUNGLLEEEEEE
 function BuyStartingItems(player)
@@ -58,7 +60,7 @@ function BuyStartingItems(player)
 end
 
 -- We want to find the jungle creep with the most health. Get that prick out the way first.
-function FindJungleCreep()
+function FindCreepTarget()
   local lowenemy = nil
   local enemies = entityList:GetEntities({classId=CDOTA_BaseNPC_Creep_Neutral,alive=true,visible=true})
   for i,v in ipairs(enemies) do
@@ -73,6 +75,38 @@ function FindJungleCreep()
   target = lowenemy
 end
 
+function FindCampTarget()
+  me:Move(campLocationDire[2])
+  FindCreepTarget()
+  
+  if target == nil then
+    me:Move(campLocationDire[3])
+    FindCreepTarget()
+    
+    if target == nil and me.level >= 2 then
+      me:Move(campLocationDire[1])
+      FindCreepTarget()
+      
+    elseif target == nil and me.level <= 2 then
+      me:Move(campLocationDire[4])
+      FindCreepTarget()
+      
+      if target == nil then
+        me:Move(campLocationDire[5])
+        FindCreepTarget()
+        
+        if target == nil then
+          me:Move(StartPos)
+          waitForSpawn = true
+        end
+      end
+    end
+  else
+    foundCamp = true
+  end
+end
+
+        
 function DeliverByCourier()
   local me = entityList:GetMyHero()
   local cour = entityList:FindEntities({classId = CDOTA_Unit_Courier,team = me.team,alive = true})[1]
@@ -136,53 +170,45 @@ function Tick(tick)
       state = 3
     end
     
-    -- TODO Start farming!!
     if inStartPosition == true and state == 3 then
-      -- Check camps. only attack hard camp if we are level 2, attack creep with most health.
+      -- Once camps spawn go look for a full camp. If all camps are empty then go wait for time to be xx:00 and new camps spawn. Once camps spawn go searching again. If we find a camp then attack the creep.
       if client.gameTime >= 30 then
-        me:Move(campLocationDire[2])
-        FindJungleCreep()
-        if target == nil then
-          me:Move(campLocationDire[3])
-          FindJungleCreep()
-        elseif me.level >= 2 and target == nil then
-          me:Move(campLocationDire[1])
-          FindJungleCreep()
-          if me:GetAbility(2):CanBeCasted() then
-            SafeCastAbility(me:GetAbility(2))
-          end
-        elseif target ~= nil then
-          FindJungleCreep()
-          me:Attack(target)
-        else
-          -- TODO if there are really no creeps in the jungle, move to the start position until the clock is xx:00 and then start checking again.
+        if foundCamp == false then
+          FindCampTarget()
+        end
+      elseif waitForSpawn == true then
+        if client.gameTime % 60 ~= 0 then
           me:Move(StartPos)
+        else
+          waitForSpawn = false
+          FindCampTarget()
         end
+      else
+        me:Attack(target)
       end
-      
-      
-      -- Let's sort out item purchasing
-      local playerEntity = entityList:getEntities({classId=CDOTA_PlayerResource})[1]
-      local gold = playerEntity:GetGold(me.playerId)
-      
-      -- Let's get a tasty morbid mask!
-      if state == 3 and gold >= 900 then
-        entityList:GetMyPlayer():BuyItem(26)
-        DeliverByCourier()
-        state = 4
-      end
-      
-      -- Let's get our smoke
-      if state == 4 and gold >= 100 then
-        entityList:GetMyPlayer():BuyItem(188)
-        if me.level == 4 then
-          me:Move(SpawnPos)
-          state = 6
-        end
-        state = 5
-      end
-      
     end
+      
+    -- Let's sort out item purchasing
+    local playerEntity = entityList:getEntities({classId=CDOTA_PlayerResource})[1]
+    local gold = playerEntity:GetGold(me.playerId)
+    
+    -- Let's get a tasty morbid mask!
+    if state == 3 and gold >= 900 then
+      entityList:GetMyPlayer():BuyItem(26)
+      DeliverByCourier()
+      state = 4
+    end
+    
+    -- Let's get our smoke
+    if state == 4 and gold >= 100 then
+      entityList:GetMyPlayer():BuyItem(188)
+      if me.level == 4 then
+        me:Move(SpawnPos)
+        state = 6
+      end
+      state = 5
+    end
+      
   end
 end
 
