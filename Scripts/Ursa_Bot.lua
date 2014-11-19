@@ -1,4 +1,4 @@
--- Ursa Jungling + Roshan Script (BETA)!
+-- Ursa (currently only dire) Jungling + Roshan Script (BETA)!
 
 -- ===================
 -- == Features V1.0 ==
@@ -117,7 +117,7 @@ function Tick(tick)
     if state == 2 and me:FindItem("item_tango") and me:FindItem("item_flask") and me:FindItem("item_stout_shield") then
       if inStartPosition == false then
         me:Move(StartPos)
-        inStartPosition == true
+        inStartPosition = true
       end
       state = 3
     end
