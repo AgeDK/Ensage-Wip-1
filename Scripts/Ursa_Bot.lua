@@ -73,14 +73,14 @@ function FindJungleCreep()
 end
 
 function DeliverByCourier()
-	local me = entityList:GetMyHero()
-	local cour = entityList:FindEntities({classId = CDOTA_Unit_Courier,team = me.team,alive = true})[1]
-	if cour then
-		client:ExecuteCmd("dota_courier_deliver")
-		if cour.flying and cour.alive then
-			client:ExecuteCmd("dota_courier_burst")  
-		end
-	end
+  local me = entityList:GetMyHero()
+  local cour = entityList:FindEntities({classId = CDOTA_Unit_Courier,team = me.team,alive = true})[1]
+  if cour then
+    client:ExecuteCmd("dota_courier_deliver")
+    if cour.flying and cour.alive then
+      client:ExecuteCmd("dota_courier_burst")  
+    end
+  end
 end
 
 function Tick(tick)
