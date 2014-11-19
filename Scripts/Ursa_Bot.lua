@@ -66,8 +66,7 @@ function FindJungleCreep()
         lowenemy = v
       end
     end
-end
-
+  end
 	target = lowenemy
   return target
 end
