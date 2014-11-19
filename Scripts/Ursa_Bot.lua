@@ -43,6 +43,9 @@ local startingItems = {44, 182, 39}
 -- Camp locations, Hard, Med, Rune, Easy, Lane
 campLocationDire = {Vector(1224, 3593), Vector(391, 3772), Vector(-1441, 2708), Vector(-4286, 3618), Vector(-3043, 4643)}
 
+-- Creep we are killing
+target = nil
+
 -- Check player is level one, then buy all the starting items we need to JUNGLLEEEEEE
 function BuyStartingItems(player)
   level = player.level
@@ -62,13 +65,12 @@ function FindJungleCreep()
     if v.spawned then
       if lowenemy == nil then
         lowenemy = v
-      elseif (lowenemy.health) < (v.health) then
+      elseif (lowenemy.maxHealth) < (v.maxHealth) then
         lowenemy = v
       end
     end
   end
   target = lowenemy
-  return target
 end
 
 function DeliverByCourier()
@@ -139,15 +141,22 @@ function Tick(tick)
       -- Check camps. only attack hard camp if we are level 2, attack creep with most health.
       if client.gameTime >= 30 then
         me:Move(campLocationDire[2])
-        if FindJungleCreep() == nil then
+        FindJungleCreep()
+        if target == nil then
           me:Move(campLocationDire[3])
-        elseif me.level >= 2 and FindJungleCreep() == nil then
+          FindJungleCreep()
+        elseif me.level >= 2 and target == nil then
           me:Move(campLocationDire[1])
+          FindJungleCreep()
           if me:GetAbility(2):CanBeCasted() then
             SafeCastAbility(me:GetAbility(2))
           end
+        elseif target ~= nil then
+          FindJungleCreep()
+          me:Attack(target)
         else
-          me:Attack(FindJungleCreep())
+          -- TODO if there are really no creeps in the jungle, move to the start position until the clock is xx:00 and then start checking again.
+          me:Move(StartPos)
         end
       end
       
