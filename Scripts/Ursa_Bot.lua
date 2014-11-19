@@ -69,6 +69,17 @@ function FindJungleCreep()
   return target
 end
 
+function DeliverByCourier()
+	local me = entityList:GetMyHero()
+	local cour = entityList:FindEntities({classId = CDOTA_Unit_Courier,team = me.team,alive = true})[1]
+	if cour then
+		client:ExecuteCmd("dota_courier_deliver")
+		if cour.flying and cour.alive then
+			client:ExecuteCmd("dota_courier_burst")  
+		end
+	end
+end
+
 function Tick(tick)
   
   -- Check we're actually in a game and it's not paused and we're not waiting for something
@@ -146,12 +157,17 @@ function Tick(tick)
       -- Let's get a tasty morbid mask!
       if state == 3 and gold >= 900 then
         entityList:GetMyPlayer():BuyItem(26)
+        DeliverByCourier()
         state = 4
       end
       
       -- Let's get our smoke
       if state == 4 and gold >= 100 then
         entityList:GetMyPlayer():BuyItem(188)
+        if me.level == 4 then
+          me:Move(SpawnPos)
+          state = 6
+        end
         state = 5
       end
       
@@ -169,7 +185,6 @@ function Key(msg,code)
     print("X="..client.mousePosition.x.."; Y="..client.mousePosition.y.."; Team="..me.team"; Hero Position="..me.position)
   end
 end
-
 
 script:RegisterEvent(EVENT_TICK,Tick)
 script:RegisterEvent(EVENT_KEY,Key)
