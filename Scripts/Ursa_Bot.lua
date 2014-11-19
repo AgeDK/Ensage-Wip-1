@@ -41,7 +41,7 @@ local levels = {3,2,3,2,1,4,1,1,1,2,2,3,3,4,5,4,5,5,5,5,5,5,5,5,5}
 local startingItems = {44, 182, 39}
 
 -- Camp locations, Hard, Med, Rune, Easy, Lane
-campLocationDire = {Vector(1224, 3593), Vector(391, 3772), Vector(-1441, 2708), Vector(-4286, 3618), Vector(-3043, 4643)}
+campLocationDire = {Vector(1224, 3593, 496), Vector(391, 3772, 496), Vector(-1441, 2708, 496), Vector(-4286, 3618, 496), Vector(-3043, 4643, 496)}
 
 -- Config for finding a camp
 target = nil
