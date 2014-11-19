@@ -132,6 +132,7 @@ function Tick(tick)
           me:Move(campLocationDire[1])
           if me:GetAbility(2):CanBeCasted() then
             SafeCastAbility(me:GetAbility(2))
+          end
         else
           me:Attack(FindJungleCreep())
         end
@@ -145,13 +146,13 @@ function Tick(tick)
       -- Let's get a tasty morbid mask!
       if state == 3 and gold >= 900 then
         entityList:GetMyPlayer():BuyItem(26)
-        state == 4
+        state = 4
       end
       
       -- Let's get our smoke
       if state == 4 and gold >= 100 then
         entityList:GetMyPlayer():BuyItem(188)
-        state == 5
+        state = 5
       end
       
     end
@@ -165,7 +166,7 @@ function Key(msg,code)
   if IsKeyDown(config.Test) then
     local me = entityList:GetMyHero()
     client:ExecuteCmd("say state = "..state.." inPosition = "..(inPosition and 1 or 0).."TIME ="..client.gameTime)
-    print("X="..client.mousePosition.x.."; Y="..client.mousePosition.y.."; Team="..me.team;"Hero Position="..me.position)
+    print("X="..client.mousePosition.x.."; Y="..client.mousePosition.y.."; Team="..me.team"; Hero Position="..me.position)
   end
 end
 
