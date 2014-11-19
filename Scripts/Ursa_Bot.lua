@@ -103,7 +103,6 @@ function FindCampTarget()
   else
     foundCamp = true
   end
-  print(foundCamp)
 end
 
         
@@ -175,21 +174,18 @@ function Tick(tick)
       if client.gameTime >= 30 then
         if foundCamp == false then
           FindCampTarget()
-          me:Attack(target)
-          print("Stuck 1")
+          if foundCamp == true then
+            print("Found a camp!")
+            me:Attack(target)
+          elseif waitForSpawn == true then
+            if client.gameTime % 60 ~= 0 then
+              me:Move(StartPos)
+            else
+              waitForSpawn = false
+              FindCampTarget()
+            end
+          end
         end
-      elseif waitForSpawn == true then
-        if client.gameTime % 60 ~= 0 then
-          me:Move(StartPos)
-          print("Stuck 2")
-        else
-          waitForSpawn = false
-          FindCampTarget()
-          print("Stuck 3")
-        end
-      elseif foundCamp == true then
-        me:Attack(target)
-        print("I'm trying to attack!")
       end
     end
       
