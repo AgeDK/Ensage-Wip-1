@@ -39,7 +39,6 @@ local levels = {3,2,3,2,1,4,1,1,1,2,2,3,3,4,5,4,5,5,5,5,5,5,5,5,5}
 
 -- Salve, tango and stout shield
 local startingItems = {44, 182, 39}
-range = 0
 
 -- Camp locations, Hard, Med, Rune, Easy, Lane
 campLocationDire = {Vector(1224, 3593), Vector(391, 3772), Vector(-1441, 2708), Vector(-4286, 3618), Vector(-3043, 4643)}
