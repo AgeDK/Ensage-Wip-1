@@ -78,38 +78,17 @@ end
 function FindCampTarget()
   FindCreepTarget()
   if target == nil then
-    while GetDistance2D(me, campLocationDire[2]) do
+    if GetDistance2D(me, campLocationDire[2]) < 100 then
+      me:Move(campLocationDire[3])
+    elseif GetDistance2D(me, campLocationDire[3]) < 100 then
+       me:Move(campLocationDire[4])
+    elseif GetDistance2D(me, campLocationDire[4]) < 100 then
+      me:Move(campLocationDire[5])
+    elseif GetDistance2D(me, campLocationDire[5]) < 100 then
+      me:Move(StartPos)
+      waitForSpawn = true
+    elseif not waitForSpawn then
       me:Move(campLocationDire[2])
-      Sleep(200)
-    end
-    FindCreepTarget()
-    if target == nil then
-      while GetDistance2D(me, campLocationDire[3]) do
-        me:Move(campLocationDire[3])
-        Sleep(200)
-      end
-      FindCreepTarget()
-      if target == nil then
-        while GetDistance2D(me, campLocationDire[4]) do
-          me:Move(campLocationDire[4])
-          Sleep(200)
-        end
-        FindCreepTarget()
-        if target == nil then
-          while GetDistance2D(me, campLocationDire[5]) do
-            me:Move(campLocationDire[5])
-            Sleep(200)
-          end
-          FindCreepTarget()
-          if target == nil then
-            while GetDistance2D(me, StartPos) do
-              me:Move(StartPos)
-              Sleep(200)
-            end
-            waitForSpawn = true
-          end
-        end
-      end
     end
   else
     foundCamp = true
