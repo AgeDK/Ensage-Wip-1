@@ -1,5 +1,26 @@
 -- Ursa Jungling + Roshan Script (BETA)!
 
+-- ===================
+-- == Features V1.0 ==
+-- ===================
+-- Works only on dire, jungles blindly with nothing smart
+-- Buys morbid mask and smoke then goes to kill Roshan.
+-- Will use tango if you're on half health. Always use tango while killing first camp
+-- Will salve when you're at (maxHealth-salve healing)
+-- Takes you to and kills Roshan when you're level 4 and max health/mana with stout shield, smoke and morbid mask
+
+-- =======================
+-- == Upcoming features ==
+-- =======================
+-- Smart jungling - will prioritize high xp low damage camps at the start for fast level 4
+-- Stand in clever spots so that only one creep attacks us at a time
+-- Ursa wombo combo! Overpower, blink, earthshock, phase boots CHASE AND KILL
+-- Support for diffusal blade - are they getting away? DIFFU! Do they have a buff we don't want them to have? (Ghost scepter, omniknight etc) DIFFU! By the way, if you don't buy diffu on ursa you suck
+-- Auto phase if they're faster than you
+-- Auto earthshock if enemy hero in range
+-- Did we die with aegis? Are we alone, has our team abandoned us?! Let's blink the fuck away.
+-- Check rune before we kill Roshan - a DD would be very useful!
+
 -- We probably gonna need some libraries so let's get em
 
 require("libs.Utils")
@@ -10,14 +31,18 @@ local config = ScriptConfig.new()
 config:SetParameter("minHealth", 150)
 config:SetParameter("Test", "L", config.TYPE_HOTKEY)
 config:Load()
+
 local currentLevel = 0
 local state = 1
 local inStartPosition = false
 local levels = {3,2,3,2,1,4,1,1,1,2,2,3,3,4,5,4,5,5,5,5,5,5,5,5,5}
--- Buy a salve, tango and stout shield
-local startingItems = {44, 182, 39}
 
-startJunglingTime = 29
+-- Salve, tango and stout shield
+local startingItems = {44, 182, 39}
+range = 0
+
+-- Camp locations, Hard, Med, Rune, Easy, Lane
+campLocationDire = {Vector(1224, 3593), Vector(391, 3772), Vector(-1441, 2708), Vector(-4286, 3618), Vector(-3043, 4643)}
 
 -- Check player is level one, then buy all the starting items we need to JUNGLLEEEEEE
 function BuyStartingItems(player)
@@ -30,11 +55,29 @@ function BuyStartingItems(player)
   state = 2
 end
 
+-- We want to find the jungle creep with the most health. Get that prick out the way first.
+function FindJungleCreep()
+	local lowenemy = nil
+	local enemies = entityList:FindEntities({type=TYPE_CREEP,team=TEAM_NEUTRAL,alive=true,visible=true})
+	for i,v in ipairs(enemies) do  
+		if lowenemy == nil then
+      lowenemy = v
+		elseif (lowenemy.health) < (v.health) then
+      lowenemy = v
+		end
+	end
+	target = lowenemy
+  return target
+end
+
 function Tick(tick)
+  
+  -- Check we're actually in a game and it's not paused and we're not waiting for something
   if client.loading then return end
   if not PlayingGame() or client.paused then return end
   if not SleepCheck() then return end Sleep(200)
   
+  -- Pick Ursa!
   if client.gameState == Client.STATE_PICK then
     client:ExecuteCmd("dota_select_hero npc_dota_hero_ursa")
     currentLevel = 0
@@ -42,8 +85,10 @@ function Tick(tick)
     return
   end
   
+  -- Get our hero so we can access the attributes.
   local me = entityList:GetMyHero()
   
+  -- Check we're playing, we're spawned in and find out which team we're on.
   if PlayingGame and me.alive then
     if currentLevel == 0 then
       if me.team == LuaEntity.TEAM_DIRE then
@@ -55,6 +100,7 @@ function Tick(tick)
       end
     end
     
+    -- Auto level up based on my skill build. Feel free to change this but it is a great build. Levels are at the top. 1, 2, 3 or 4 for each of ursa's skills. 5 for stats.
     if currentLevel ~= me.level then
       local ability = me.abilities
       local prev = SelectUnit(me)
@@ -62,10 +108,12 @@ function Tick(tick)
       SelectBack(prev)
     end
     
+    -- If we've picked Ursa and spawned in, buy our starting items
     if state == 1 then
       BuyStartingItems(me)
     end
   
+    -- If we have our starting items in our inventory then let's go to the jungle.
     if state == 2 and me:FindItem("item_tango") and me:FindItem("item_flask") and me:FindItem("item_stout_shield") then
       if inStartPosition == false then
         me:Move(StartPos)
@@ -75,10 +123,39 @@ function Tick(tick)
     end
     
     -- TODO Start farming!!
-    if me.health == me.maxHealth and inStartPosition == true and state == 3 then
-      -- Start farming here
+    if inStartPosition == true and state == 3 then
+      -- Check camps. only attack hard camp if we are level 2, attack creep with most health.
+      if client.gameTime >= 30 then
+        me:Move(campLocationDire[2])
+        if FindJungleCreep() == nil then
+          me:Move(campLocationDire[3])
+        elseif me.level >= 2 and FindJungleCreep() == nil then
+          me:Move(campLocationDire[1])
+          if me:GetAbility(2):CanBeCasted() then
+            SafeCastAbility(me:GetAbility(2))
+        else
+          me:Attack(FindJungleCreep())
+        end
+      end
+      
+      
+      -- Let's sort out item purchasing
+      local playerEntity = entityList:getEntities({classId=CDOTA_PlayerResource})[1]
+      local gold = playerEntity:GetGold(me.playerId)
+      
+      -- Let's get a tasty morbid mask!
+      if state == 3 and gold >= 900 then
+        entityList:GetMyPlayer():BuyItem(26)
+        state == 4
+      end
+      
+      -- Let's get our smoke
+      if state == 4 and gold >= 100 then
+        entityList:GetMyPlayer():BuyItem(188)
+        state == 5
+      end
+      
     end
-    
   end
 end
 
