@@ -134,8 +134,10 @@ function Tick(tick)
   
   -- Each time camps respawn, set how many we've visited to zero
   if client.gameTime % 60 == 0 then
-      campsVisited = 0
-      waitForSpawn = false
+    print(campsVisited)
+    campsVisited = 0
+    print(campsVisited)
+    waitForSpawn = false
     end
   
   -- Check we're playing, we're spawned in and find out which team we're on.
