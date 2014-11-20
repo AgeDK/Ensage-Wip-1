@@ -25,6 +25,7 @@
 
 require("libs.Utils")
 require("libs.ScriptConfig")
+require("libs.HeroInfo")
 
 -- Script config, hotkeys, levelling etc
 local config = ScriptConfig.new()
