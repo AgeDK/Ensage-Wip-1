@@ -175,12 +175,15 @@ function GoJungling()
 end
 
 function EatTango()
+  print("In tango method")
   local tango = me:FindItem("item_tango")
-  if not tango == nil then
+  if not tango then
     if not me:DoesHaveModifier("modifier_tango_heal") and me:DoesHaveModifier("modifier_flask_healing") then
+      print("Trying to eat tango")
       me:SafeCastItem(tango, tangoLocationDire[tangoCamp])
       Sleep(500)
       if not me:DoesHaveModifier("modifier_tango_heal") then
+        print("Trying to eat other tango")
         me:SafeCastItem(tango, tangoLocationDire[tangoCamp + 1])
         Sleep(500)
         state = prevState
@@ -274,11 +277,11 @@ function Tick(tick)
       state = 3
     end
     
-    if me.health == (me.maxHealth - 150) then
+    if me.health <= (me.maxHealth - 150) then
       print("Need a tango!")
       print("Set state to 4")
-      state = 4
       prevState = state
+      state = 4
       EatTango()
     end
     
