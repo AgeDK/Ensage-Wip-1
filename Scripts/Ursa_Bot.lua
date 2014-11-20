@@ -47,6 +47,7 @@ campLocationDire = {Vector(-1041, 3511, 0), Vector(-477, 3881, 0), Vector(-1457,
 target = nil
 foundCamp = false
 waitForSpawn = false
+campsVisited = 0
 
 -- Check player is level one, then buy all the starting items we need to JUNGLLEEEEEE
 function BuyStartingItems(player)
@@ -77,17 +78,26 @@ end
 
 function FindCampTarget()
   FindCreepTarget()
+  campsVisited = 1
   if target == nil then
-    if GetDistance2D(me, campLocationDire[2]) < 300 then
+    if GetDistance2D(me, campLocationDire[2]) < 300 and campsVisited == 1 then
       me:Move(campLocationDire[3])
-    elseif GetDistance2D(me, campLocationDire[3]) < 300 then
+      campsVisited = 2
+    elseif GetDistance2D(me, campLocationDire[3]) < 300 and campsVisited == 2 then
+      if me.level < 2 then
        me:Move(campLocationDire[4])
-    elseif GetDistance2D(me, campLocationDire[4]) < 300 then
+       campsVisited = 3
+     else
+       me:Move(campLocationDire[1])
+       campsVisited = 3
+       SafeCastAbility(me:GetAbility(2))
+    elseif GetDistance2D(me, campLocationDire[4]) < 300 and campsVisited == 3 then
       me:Move(campLocationDire[5])
-    elseif GetDistance2D(me, campLocationDire[5]) < 300 then
+      campsVisited = 4
+    elseif GetDistance2D(me, campLocationDire[5]) < 300 and campsVisited == 4 then
       me:Move(StartPos)
       waitForSpawn = true
-    elseif not waitForSpawn and GetDistance2D(me, StartPos) < 300 then
+    elseif not waitForSpawn and GetDistance2D(me, StartPos) < 300 and campsVisited == 0 then
       me:Move(campLocationDire[2])
     end
   else
@@ -157,6 +167,10 @@ function Tick(tick)
         inStartPosition = true
       end
       state = 3
+    end
+    
+    if client.gameTime % 60 == 0 then
+      campsVisited = 0
     end
     
     if inStartPosition == true and state == 3 then
