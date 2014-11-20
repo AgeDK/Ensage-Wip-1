@@ -78,16 +78,16 @@ end
 function FindCampTarget()
   FindCreepTarget()
   if target == nil then
-    if GetDistance2D(me, campLocationDire[2]) < 100 then
+    if GetDistance2D(me, campLocationDire[2]) < 300 then
       me:Move(campLocationDire[3])
-    elseif GetDistance2D(me, campLocationDire[3]) < 100 then
+    elseif GetDistance2D(me, campLocationDire[3]) < 300 then
        me:Move(campLocationDire[4])
-    elseif GetDistance2D(me, campLocationDire[4]) < 100 then
+    elseif GetDistance2D(me, campLocationDire[4]) < 300 then
       me:Move(campLocationDire[5])
-    elseif GetDistance2D(me, campLocationDire[5]) < 100 then
+    elseif GetDistance2D(me, campLocationDire[5]) < 300 then
       me:Move(StartPos)
       waitForSpawn = true
-    elseif not waitForSpawn and GetDistance2D(me, StartPos) < 100 then
+    elseif not waitForSpawn and GetDistance2D(me, StartPos) < 300 then
       me:Move(campLocationDire[2])
     end
   else
@@ -165,7 +165,9 @@ function Tick(tick)
         if not target or not target.alive then FindCampTarget() end
         if foundCamp == false then
           FindCampTarget()
-        elseif target and target.alive then
+        end
+        
+        if target and target.alive then
           me:Attack(target)
         elseif not target or not target.alive then
           target = nil
