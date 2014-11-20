@@ -87,7 +87,7 @@ function FindCampTarget()
     elseif GetDistance2D(me, campLocationDire[5]) < 100 then
       me:Move(StartPos)
       waitForSpawn = true
-    elseif not waitForSpawn then
+    elseif not waitForSpawn and GetDistance2D(me, StartPos) < 100 then
       me:Move(campLocationDire[2])
     end
   else
