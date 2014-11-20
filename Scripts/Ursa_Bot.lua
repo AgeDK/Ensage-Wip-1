@@ -189,15 +189,15 @@ function Tick(tick)
     local gold = playerEntity:GetGold(me.playerId)
     
     -- Let's get a tasty morbid mask!
-    if state == 3 and gold >= 900 then
-      me:BuyItem(26)
+    if state == 3 and gold > 900 then
+      entityList:GetMyPlayer():BuyItem(26)
       DeliverByCourier()
       state = 4
     end
     
     -- Let's get our smoke
     if state == 4 and gold > 100 then
-      me:BuyItem(188)
+      entityList:GetMyPlayer():BuyItem(188)
       if me.level == 4 then
         me:Move(SpawnPos)
         state = 6
