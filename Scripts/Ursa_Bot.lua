@@ -119,7 +119,7 @@ function Tick(tick)
   -- Check we're actually in a game and it's not paused and we're not waiting for something
   if client.loading then return end
   if not IsIngame() or client.paused then return end
-  if not SleepCheck() then return end Sleep(200)
+  if not SleepCheck() then return end
   
   -- Pick Ursa!
   if client.gameState == Client.STATE_PICK then
