@@ -162,17 +162,14 @@ function Tick(tick)
     if inStartPosition == true and state == 3 then
       -- Once camps spawn go look for a full camp. If all camps are empty then go wait for time to be xx:00 and new camps spawn. Once camps spawn go searching again. If we find a camp then attack the creep. Once that creep dies attack other creeps in camp. If camp empty, go searching again. 
       if client.gameTime >= 30 then
+        if not target or not target.alive then FindCampTarget() end
         if foundCamp == false then
           FindCampTarget()
-        elseif foundCamp == true then
-          print("Found a camp!")
+        elseif target and target.alive then
           me:Attack(target)
-          if not target.alive then
-            print("Target died")
-            foundCamp = false
-            target = nil
-            return
-          end
+        elseif not target or not target.alive then
+          target = nil
+          foundCamp = false
         elseif waitForSpawn == true then
           if client.gameTime % 60 ~= 0 then
             me:Move(StartPos)
