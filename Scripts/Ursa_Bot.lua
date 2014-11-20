@@ -78,7 +78,6 @@ end
 
 function FindCampTarget()
   FindCreepTarget()
-  campsVisited = 1
   if target == nil then
     if GetDistance2D(me, campLocationDire[2]) < 300 and campsVisited == 1 then
       me:Move(campLocationDire[3])
@@ -100,6 +99,7 @@ function FindCampTarget()
       waitForSpawn = true
     elseif not waitForSpawn and GetDistance2D(me, StartPos) < 300 and campsVisited == 0 then
       me:Move(campLocationDire[2])
+      campsVisited = 1
     end
   else
     foundCamp = true
@@ -194,6 +194,7 @@ function Tick(tick)
         elseif not target or not target.alive then
           target = nil
           foundCamp = false
+          print(campsVisited)
         end
       end
     end
