@@ -77,6 +77,7 @@ function FindCreepTarget()
 end
 
 function FindCampTarget()
+  --
   FindCreepTarget()
   if target == nil then
     if GetDistance2D(me, campLocationDire[2]) < 300 and campsVisited == 1 then
@@ -130,6 +131,12 @@ function Tick(tick)
   -- Get our hero so we can access the attributes.
   me = entityList:GetMyHero()
   
+  -- Each time camps respawn, set how many we've visited to zero
+  if client.gameTime % 60 == 0 then
+      campsVisited = 0
+      waitForSpawn = false
+    end
+  
   -- Check we're playing, we're spawned in and find out which team we're on.
   if PlayingGame() and me.alive then
     if currentLevel == 0 then
@@ -164,27 +171,31 @@ function Tick(tick)
       state = 3
     end
     
-    if client.gameTime % 60 == 0 then
-      campsVisited = 0
-    end
-    
     if inStartPosition == true and state == 3 then
       -- Once camps spawn go look for a full camp. If all camps are empty then go wait for time to be xx:00 and new camps spawn. Once camps spawn go searching again. If we find a camp then attack the creep. Once that creep dies attack other creeps in camp. If camp empty, go searching again. 
       if client.gameTime >= 30 then
-        if not target or not target.alive then FindCampTarget() end
+        
+        --if not target or not target.alive then FindCampTarget() end
+        
+        -- If we don't have a target, look for a camp.
         if foundCamp == false then
           FindCampTarget()
         end
         
+        -- If we are waiting for a spawn, then
         if waitForSpawn == true then
+          -- If the camps haven't respawned (ie seconds/60 isn't zero), move to the start position.
           if client.gameTime % 60 ~= 0 then
             me:Move(StartPos)
+          -- Else they have spawned and we should go looking
           else
             waitForSpawn = false
             FindCampTarget()
           end
+        -- If we have a target and that target is alive then attack it
         elseif target and target.alive then
           me:Attack(target)
+        -- Else we have killed that target or killed the camp and we should go looking again.
         elseif not target or not target.alive then
           target = nil
           foundCamp = false
