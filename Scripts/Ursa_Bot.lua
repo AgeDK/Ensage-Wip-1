@@ -274,14 +274,6 @@ function Tick(tick)
       state = 3
     end
     
-    -- If we're ready to start jungling and we haven't bought any items yet
-    if inStartPosition == true and state == 3 or state > 5 and state < 8 then
-      -- If first spawn has happened
-      if client.gameTime >= 30 then        
-        GoJungling()
-      end
-    end
-    
     if me.health == (me.maxHealth - 150) then
       print("Need a tango!")
       print("Set state to 4")
@@ -290,7 +282,13 @@ function Tick(tick)
       EatTango()
     end
     
-      
+    -- If we're ready to start jungling and we haven't bought any items yet
+    if inStartPosition == true and state == 3 or state > 5 and state < 8 then
+      -- If first spawn has happened
+      if client.gameTime >= 30 then        
+        GoJungling()
+      end
+    end
       
     -- Let's sort out item purchasing
     local playerEntity = entityList:GetEntities({classId=CDOTA_PlayerResource})[1]
@@ -306,7 +304,7 @@ function Tick(tick)
     end
     
     -- Let's get our smoke
-    if state == 4 and gold > 100 then
+    if state == 6 and gold > 100 then
       entityList:GetMyPlayer():BuyItem(188)
       if me.level == 4 then
         me:Move(SpawnPos)
