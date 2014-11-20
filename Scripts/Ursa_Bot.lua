@@ -34,6 +34,17 @@ config:SetParameter("Test", "L", config.TYPE_HOTKEY)
 config:Load()
 
 local currentLevel = 0
+--=======================
+--== States Explanation==
+--=======================
+-- 1 is in base, just spawned
+-- 2 is bought items
+-- 3 is have items and moved to start position, ready to jungle
+-- 4 is need a tango
+-- 5 is need a salve
+-- 6 is have morbid mask
+-- 7 is have smoke
+-- 8 is have smoke and morbid mask and level 4 (Rosh Time)
 local state = 1
 local inStartPosition = false
 local levels = {3,2,3,2,1,4,1,1,1,2,2,3,3,4,5,4,5,5,5,5,5,5,5,5,5}
@@ -41,14 +52,21 @@ local levels = {3,2,3,2,1,4,1,1,1,2,2,3,3,4,5,4,5,5,5,5,5,5,5,5,5}
 -- Salve, tango and stout shield
 local startingItems = {44, 182, 39}
 
--- Camp locations, Hard, Med, Rune, Easy, Lane
-campLocationDire = {Vector(-1041, 3511, 0), Vector(-477, 3881, 0), Vector(-1457, 2909, 0), Vector(-3033, 4790, 0), Vector(-4228, 3680, 0)}
+-- Camp locations, Hard, Med, Rune, Easy, Lane (in that order)
+local campLocationDire = {Vector(1041, 3511, 0), Vector(-477, 3881, 0), Vector(-1457, 2909, 0), Vector(-3033, 4790, 0), Vector(-4228, 3680, 0)}
+-- Tango Locations for med x2, rune x2, hard camp x2
+local tangoLocationDire = {Vector(-50.85, 3742.53, 0), Vector(165.21, 3691.02, 0), Vector(1560.37, 3535.23, 0), Vector(1733.77, 3430.63, 0), Vector(-1341.73, 2585.26, 0), Vector(-1176.96, 2642.51,0)}
+
 
 -- Config for finding a camp
-target = nil
-foundCamp = false
-waitForSpawn = false
-campsVisited = 0
+local target = nil
+local foundCamp = false
+local waitForSpawn = false
+local campsVisited = 0
+
+-- Things for tango
+local tangoCamp = 0
+local prevState = 0
 
 -- Check player is level one, then buy all the starting items we need to JUNGLLEEEEEE
 function BuyStartingItems(player)
@@ -58,6 +76,7 @@ function BuyStartingItems(player)
       entityList:GetMyPlayer():BuyItem(item)
     end
   end
+  print("Set state to 2")
   state = 2
 end
 
@@ -78,29 +97,109 @@ function FindCreepTarget()
 end
 
 function FindCampTarget()
-  --
   FindCreepTarget()
   if target == nil then
     if GetDistance2D(me, campLocationDire[2]) < 300 and campsVisited == 1 then
+      if me.level >= 2 then
+        me:SafeCastAbility(me:GetAbility(2))
+        Sleep(100)
+      end
       me:Move(campLocationDire[3])
+      print("Going to rune camp")
       campsVisited = 2
+      tangoCamp = 3
     elseif GetDistance2D(me, campLocationDire[3]) < 300 and campsVisited == 2 then
-      me:Move(campLocationDire[4])
-      campsVisited = 3
+      if me.level < 2 then
+        me:Move(campLocationDire[4])
+        print("Going to easy camp")
+        campsVisited = 3
+      else
+        me:SafeCastAbility(me:GetAbility(2))
+        me:Move(campLocationDire[1])
+        print("Going to hard camp")
+        campsVisited = 3
+        tangoCamp = 5
+      end
     elseif GetDistance2D(me, campLocationDire[4]) < 300 and campsVisited == 3 then
+      if me.level >= 2 then
+        me:SafeCastAbility(me:GetAbility(2))
+        Sleep(100)
+      end
       me:Move(campLocationDire[5])
+      print("Going to lane camp")
       campsVisited = 4
+      tangoCamp = 0
     elseif GetDistance2D(me, campLocationDire[5]) < 300 and campsVisited == 4 then
       me:Move(StartPos)
       waitForSpawn = true
     elseif not waitForSpawn and campsVisited == 0 then
+      print("Going to med camp")
+      if me.level >= 2 then
+        me:SafeCastAbility(me:GetAbility(2))
+        Sleep(100)
+      end
       me:Move(campLocationDire[2])
+      tangoCamp = 1
       campsVisited = 1
     end
   else
     foundCamp = true
   end
 end
+
+-- Once camps spawn go look for a full camp. If all camps are empty then go wait for time to be xx:00 and new camps spawn. Once camps spawn go searching again. If we find a camp then attack the creep. Once that creep dies attack other creeps in camp. If camp empty, go searching again. 
+function GoJungling()
+  -- If we don't have a target, look for a camp.
+  if foundCamp == false then
+    FindCampTarget()
+  end
+        
+  -- If we are waiting for a spawn, then
+  if waitForSpawn == true then
+    -- If the camps haven't respawned (ie seconds/60 isn't zero), move to the start position.
+    if client.gameTime % 60 ~= 0 then
+      me:Move(StartPos)
+    -- Else they have spawned and we should go looking
+    else
+      waitForSpawn = false
+      FindCampTarget()
+    end
+      -- If we have a target and that target is alive then attack it
+  elseif target and target.alive then
+    me:Attack(target)
+  -- Else we have killed that target or killed the camp and we should go looking again.
+  elseif not target or not target.alive then
+    target = nil
+    foundCamp = false
+  end
+end
+
+function EatTango()
+  local tango = me:FindItem("item_tango")
+  if not tango == nil then
+    if not me:DoesHaveModifier("modifier_tango_heal") and me:DoesHaveModifier("modifier_flask_healing") then
+      me:SafeCastItem(tango, tangoLocationDire[tangoCamp])
+      Sleep(500)
+      if not me:DoesHaveModifier("modifier_tango_heal") then
+        me:SafeCastItem(tango, tangoLocationDire[tangoCamp + 1])
+        Sleep(500)
+        state = prevState
+      else
+        state = prevState
+      end
+    end
+  else
+    state = prevState
+  end
+end
+
+    
+      
+  -- if state = eat a tango state
+  -- a variable tango check should be set based on which camp we walk to
+  -- use tango
+  -- if we get tango buff then go back to jungling state
+  -- if we don't, eat other tango and go back to jungling state
 
         
 function DeliverByCourier()
@@ -125,6 +224,7 @@ function Tick(tick)
   if client.gameState == Client.STATE_PICK then
     client:ExecuteCmd("dota_select_hero npc_dota_hero_ursa")
     currentLevel = 0
+    print("Set state to 1")
     state = 1
     return
   end
@@ -134,9 +234,7 @@ function Tick(tick)
   
   -- Each time camps respawn, set how many we've visited to zero
   if math.floor(client.gameTime % 60) == 0 then
-    print(campsVisited)
     campsVisited = 0
-    print(campsVisited)
     waitForSpawn = false
     end
   
@@ -157,6 +255,7 @@ function Tick(tick)
       local ability = me.abilities
       local prev = SelectUnit(me)
       entityList:GetMyPlayer():LearnAbility(me:GetAbility(levels[me.level]))
+      currentLevel = currentLevel + 1
       SelectBack(prev)
     end
     
@@ -171,40 +270,27 @@ function Tick(tick)
         me:Move(StartPos)
         inStartPosition = true
       end
+      print("Set state to 3")
       state = 3
     end
     
-    if inStartPosition == true and state == 3 then
-      -- Once camps spawn go look for a full camp. If all camps are empty then go wait for time to be xx:00 and new camps spawn. Once camps spawn go searching again. If we find a camp then attack the creep. Once that creep dies attack other creeps in camp. If camp empty, go searching again. 
-      if client.gameTime >= 30 then
-        
-        --if not target or not target.alive then FindCampTarget() end
-        
-        -- If we don't have a target, look for a camp.
-        if foundCamp == false then
-          FindCampTarget()
-        end
-        
-        -- If we are waiting for a spawn, then
-        if waitForSpawn == true then
-          -- If the camps haven't respawned (ie seconds/60 isn't zero), move to the start position.
-          if client.gameTime % 60 ~= 0 then
-            me:Move(StartPos)
-          -- Else they have spawned and we should go looking
-          else
-            waitForSpawn = false
-            FindCampTarget()
-          end
-        -- If we have a target and that target is alive then attack it
-        elseif target and target.alive then
-          me:Attack(target)
-        -- Else we have killed that target or killed the camp and we should go looking again.
-        elseif not target or not target.alive then
-          target = nil
-          foundCamp = false
-        end
+    -- If we're ready to start jungling and we haven't bought any items yet
+    if inStartPosition == true and state == 3 or state > 5 and state < 8 then
+      -- If first spawn has happened
+      if client.gameTime >= 30 then        
+        GoJungling()
       end
     end
+    
+    if me.health == (me.maxHealth - 150) then
+      print("Need a tango!")
+      print("Set state to 4")
+      state = 4
+      prevState = state
+      EatTango()
+    end
+    
+      
       
     -- Let's sort out item purchasing
     local playerEntity = entityList:GetEntities({classId=CDOTA_PlayerResource})[1]
@@ -213,8 +299,10 @@ function Tick(tick)
     -- Let's get a tasty morbid mask!
     if state == 3 and gold > 900 then
       entityList:GetMyPlayer():BuyItem(26)
+      Sleep(200)
       DeliverByCourier()
-      state = 4
+      print("Set state to 6")
+      state = 6
     end
     
     -- Let's get our smoke
@@ -222,9 +310,13 @@ function Tick(tick)
       entityList:GetMyPlayer():BuyItem(188)
       if me.level == 4 then
         me:Move(SpawnPos)
-        state = 6
+        print("Set state to 8")
+        state = 8
       end
-      state = 5
+      if me:FindItem("item_smoke_of_deceit") then
+        print("Set state to 7")
+        state = 7
+      end
     end
       
   end
