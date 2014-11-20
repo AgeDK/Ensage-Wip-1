@@ -133,7 +133,7 @@ function Tick(tick)
   me = entityList:GetMyHero()
   
   -- Each time camps respawn, set how many we've visited to zero
-  if math.floor(client.gameTime) % 60 == 0 then
+  if math.floor(client.gameTime % 60) == 0 then
       campsVisited = 0
       waitForSpawn = false
     end
