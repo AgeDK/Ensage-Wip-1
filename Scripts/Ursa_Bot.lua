@@ -83,14 +83,8 @@ function FindCampTarget()
       me:Move(campLocationDire[3])
       campsVisited = 2
     elseif GetDistance2D(me, campLocationDire[3]) < 300 and campsVisited == 2 then
-      if me.level < 2 then
-       me:Move(campLocationDire[4])
-       campsVisited = 3
-     else
-       me:Move(campLocationDire[1])
-       campsVisited = 3
-       SafeCastAbility(me:GetAbility(2))
-     end
+      me:Move(campLocationDire[4])
+      campsVisited = 3
     elseif GetDistance2D(me, campLocationDire[4]) < 300 and campsVisited == 3 then
       me:Move(campLocationDire[5])
       campsVisited = 4
@@ -194,7 +188,6 @@ function Tick(tick)
         elseif not target or not target.alive then
           target = nil
           foundCamp = false
-          print(campsVisited)
         end
       end
     end
