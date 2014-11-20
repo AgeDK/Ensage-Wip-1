@@ -181,18 +181,17 @@ function Tick(tick)
           FindCampTarget()
         end
         
-        if target and target.alive then
-          me:Attack(target)
-        elseif not target or not target.alive then
-          target = nil
-          foundCamp = false
-        elseif waitForSpawn == true then
+        if waitForSpawn == true then
           if client.gameTime % 60 ~= 0 then
             me:Move(StartPos)
           else
             waitForSpawn = false
             FindCampTarget()
-          end
+        elseif target and target.alive then
+          me:Attack(target)
+        elseif not target or not target.alive then
+          target = nil
+          foundCamp = false
         end
       end
     end
