@@ -178,7 +178,7 @@ function EatTango()
   print("In tango method")
   local tango = me:FindItem("item_tango")
   if not tango then
-    if not me:DoesHaveModifier("modifier_tango_heal") and me:DoesHaveModifier("modifier_flask_healing") then
+    if not me:DoesHaveModifier("modifier_tango_heal") and not me:DoesHaveModifier("modifier_flask_healing") then
       print("Trying to eat tango")
       me:SafeCastItem(tango, tangoLocationDire[tangoCamp])
       Sleep(500)
