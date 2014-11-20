@@ -91,6 +91,7 @@ function FindCampTarget()
        me:Move(campLocationDire[1])
        campsVisited = 3
        SafeCastAbility(me:GetAbility(2))
+     end
     elseif GetDistance2D(me, campLocationDire[4]) < 300 and campsVisited == 3 then
       me:Move(campLocationDire[5])
       campsVisited = 4
@@ -187,6 +188,7 @@ function Tick(tick)
           else
             waitForSpawn = false
             FindCampTarget()
+          end
         elseif target and target.alive then
           me:Attack(target)
         elseif not target or not target.alive then
