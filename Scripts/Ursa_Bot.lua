@@ -174,6 +174,12 @@ function GoJungling()
   end
 end
 
+  -- if state = eat a tango state
+  -- a variable tango check should be set based on which camp we walk to
+  -- use tango
+  -- if we get tango buff then go back to jungling state
+  -- if we don't, eat other tango and go back to jungling state
+  -- TODO Fix this with mouseover
 function EatTango()
   print("In tango method")
   local tango = me:FindItem("item_tango")
@@ -196,17 +202,10 @@ function EatTango()
   end
 end
 
-    
-      
-  -- if state = eat a tango state
-  -- a variable tango check should be set based on which camp we walk to
-  -- use tango
-  -- if we get tango buff then go back to jungling state
-  -- if we don't, eat other tango and go back to jungling state
-
         
 function DeliverByCourier()
   me = entityList:GetMyHero()
+  --TODO break this out into is courier available
   local cour = entityList:FindEntities({classId = CDOTA_Unit_Courier,team = me.team,alive = true})[1]
   if cour then
     client:ExecuteCmd("dota_courier_deliver")
@@ -217,7 +216,9 @@ function DeliverByCourier()
 end
 
 function Tick(tick)
-  
+  if entityList:GetMouseover() then
+    print(entityList:GetMouseover())
+  end
   -- Check we're actually in a game and it's not paused and we're not waiting for something
   if client.loading then return end
   if not IsIngame() or client.paused then return end
