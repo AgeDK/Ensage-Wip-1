@@ -25,6 +25,8 @@ local autoChase = false
 local chaseVictim = nil
 local reg = false
 
+local monitor = client.screenSize.x/1600
+local F14 = drawMgr:CreateFont("F14","Tahoma",14*monitor,550*monitor) 
 local chaseText = drawMgr:CreateText(-80*monitor,-20*monitor,-1,'AutoChase',F14) chaseText.visible = false
 
 function Key(msg, code)
@@ -36,6 +38,8 @@ end
 
 function Tick(tick)
   
+  print(chaseKey)
+  print(autoChase)
   if not PlayingGame() or client.paused then return end
   
   local me = entityList:GetMyHero()
@@ -63,7 +67,7 @@ function Tick(tick)
     local enemies = entityList:GetEntities({type=LuaEntity.TYPE_HERO,team=me:GetEnemyTeam(),visible=true,alive=true})
     if me.alive and bloodRage and bloodRage.level > 0 and bloodRage.state == LuaEntityAbility.STATE_READY then
       for i, v in ipairs(enemies) do
-        if v.health > chaseHealth then
+        if v.health <= chaseHealth then
           v = chaseVictim
         end
       end
