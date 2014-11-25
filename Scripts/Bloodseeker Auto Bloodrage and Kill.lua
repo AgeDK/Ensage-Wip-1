@@ -9,6 +9,7 @@
 
 require("libs.Utils")
 require("libs.ScriptConfig")
+require("libs.HeroInfo")
 
 -- Script config - set hotkeys blah blah
 
@@ -20,7 +21,6 @@ config:Load()
 chaseKey = config.chaseKey
 chaseHealth = config.chaseHealth
 
-local myHero = nil
 local autoChase = false
 local chaseVictim = nil
 local reg = false
@@ -32,14 +32,15 @@ local chaseText = drawMgr:CreateText(-80*monitor,-20*monitor,-1,'AutoChase',F14)
 function Key(msg, code)
   if msg ~= KEY_UP or client.chat or client.console then return end
   if code == chaseKey then
+    print("WORK")
+    print(autoChase)
     autoChase = not autoChase
+    print(autoChase)
   end
 end
 
 function Tick(tick)
   
-  print(chaseKey)
-  print(autoChase)
   if not PlayingGame() or client.paused then return end
   
   local me = entityList:GetMyHero()
@@ -47,41 +48,37 @@ function Tick(tick)
     return
   end
   
-  if chaseVictim then
-    if autoChase then
-      chaseText.entity = me
-      chaseText.entityPosition = Vector(0,0,me.healthBarOffset)
-      chaseText.text = "Auto Chasing: "..client:Localize(chaseVictim.name)
+  if autoChase then
+	  chaseText.entity = me
+    chaseText.entityPosition = Vector(0,0,me.healthBarOffset)
+    if not chaseVictim then
+      chaseText.text = "Autochase Enabled"
     else
-      chaseText.text = "Not chasing"
+      chaseText.text = "Auto Chasing: "..client:Localize(chaseVictim.name)
     end
-    chaseText.visible = true
   else
-    chaseText.visible = false
+    chaseText.text = "Not chasing"
   end
   
-  if not myHero then
-    myHero = me
-  else
-    local bloodRage = me:GetAbility(1)
-    local enemies = entityList:GetEntities({type=LuaEntity.TYPE_HERO,team=me:GetEnemyTeam(),visible=true,alive=true})
-    if me.alive and bloodRage and bloodRage.level > 0 and bloodRage.state == LuaEntityAbility.STATE_READY then
-      for i, v in ipairs(enemies) do
-        if v.health <= chaseHealth then
-          v = chaseVictim
-        end
+
+  local bloodRage = me:GetAbility(1)
+  local enemies = entityList:GetEntities({type=LuaEntity.TYPE_HERO,team=me:GetEnemyTeam(),visible=true,alive=true})
+  if me.alive and bloodRage and bloodRage.level > 0 and bloodRage.state == LuaEntityAbility.STATE_READY then
+    for i, v in ipairs(enemies) do
+      if v.health <= chaseHealth then
+        v = chaseVictim
       end
-      if victim and victim.visible and autocChase then
-        if GetDistance2D(me, v) <= myHero.attackRange-25 then
-          if bloodRage and bloodRage.state == LuaEntityAbility.STATE_READY then
-              me:SafeCastAbility(bloodRage)
-          end
-          entityList:GetMyPlayer():Attack(victim)
-          Sleep(100)
-        else
-          me:Move(victim.position)
-          Sleep(100)
+    end
+    if chaseVictim and chaseVictim.visible and autoChase then
+      if GetDistance2D(me, v) <= me.attackRange-25 then
+        if bloodRage and bloodRage.state == LuaEntityAbility.STATE_READY then
+          me:SafeCastAbility(bloodRage)
         end
+        entityList:GetMyPlayer():Attack(chaseVictim)
+        Sleep(100)
+      else
+        me:Move(chaseVictim.position)
+        Sleep(100)
       end
     end
   end
@@ -93,14 +90,13 @@ function Load()
     if not me or me.classId ~= CDOTA_Unit_Hero_Bloodseeker then
       script:Disable()
     else
-      chaseText.visible = false
-      myHero = nil
+      chaseText.visible = true
       reg = true
       victim = nil
       autoChase = false
       chaseVictim = nil
       script:RegisterEvent(EVENT_TICK, Tick)
-      script:RegisterEvent(EVENT_KEY, key)
+      script:RegisterEvent(EVENT_KEY, Key)
       script:UnregisterEvent(Load)
     end
   end
@@ -108,14 +104,14 @@ end
 
 function Close()
   chaseText.visible = false
-  myHero = nil
   victim = nil
   autoChase = false
   chaseVictim = nil
   if reg then
     script:UnregisterEvent(Tick)
     script:UnregisterEvent(Key)
-    script:RegisterEvent(EVENT_TICK, load)
+    script:RegisterEvent(EVENT_TICK, Load)
+    reg = false
   end
 end
 
