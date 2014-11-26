@@ -32,10 +32,7 @@ local chaseText = drawMgr:CreateText(-80*monitor,-20*monitor,-1,'AutoChase',F14)
 function Key(msg, code)
   if msg ~= KEY_UP or client.chat or client.console then return end
   if code == chaseKey then
-    print("WORK")
-    print(autoChase)
     autoChase = not autoChase
-    print(autoChase)
   end
 end
 
