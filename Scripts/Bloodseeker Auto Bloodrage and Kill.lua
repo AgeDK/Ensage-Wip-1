@@ -50,30 +50,41 @@ function Tick(tick)
     chaseText.entityPosition = Vector(0,0,me.healthBarOffset)
     if not chaseVictim then
       chaseText.text = "Autochase Enabled"
+	  print("chasing enabled")
     else
       chaseText.text = "Auto Chasing: "..client:Localize(chaseVictim.name)
+	  print("chasing hero")
     end
   else
+  print("no chase")
     chaseText.text = "Not chasing"
   end
   
 
   local bloodRage = me:GetAbility(1)
   local enemies = entityList:GetEntities({type=LuaEntity.TYPE_HERO,team=me:GetEnemyTeam(),visible=true,alive=true})
+  print("one")
   if me.alive and bloodRage and bloodRage.level > 0 and bloodRage.state == LuaEntityAbility.STATE_READY then
+  print("two")
     for i, v in ipairs(enemies) do
+	print("three")
       if v.health <= chaseHealth then
+	  print("four")
         v = chaseVictim
       end
     end
     if chaseVictim and chaseVictim.visible and autoChase then
+	print("Five")
       if GetDistance2D(me, v) <= me.attackRange-25 then
+	  print("six")
         if bloodRage and bloodRage.state == LuaEntityAbility.STATE_READY then
+		print("seven")
           me:SafeCastAbility(bloodRage)
         end
         entityList:GetMyPlayer():Attack(chaseVictim)
         Sleep(100)
       else
+	  print("eight")
         me:Move(chaseVictim.position)
         Sleep(100)
       end
