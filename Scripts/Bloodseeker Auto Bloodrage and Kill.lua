@@ -45,53 +45,67 @@ function Tick(tick)
     return
   end
   
-  if autoChase then
-	  chaseText.entity = me
-    chaseText.entityPosition = Vector(0,0,me.healthBarOffset)
-    if not chaseVictim then
-      chaseText.text = "Autochase Enabled"
-	  print("chasing enabled")
-    else
-      chaseText.text = "Auto Chasing: "..client:Localize(chaseVictim.name)
-	  print("chasing hero")
-    end
-  else
-  print("no chase")
-    chaseText.text = "Not chasing"
-  end
+--  if autoChase then
+--	  chaseText.entity = me
+--    chaseText.entityPosition = Vector(0,0,me.healthBarOffset)
+--    if not chaseVictim then
+--      chaseText.text = "Autochase Enabled"
+--	  print("chasing enabled")
+--    else
+--      chaseText.text = "Auto Chasing: "..client:Localize(chaseVictim.name)
+--	  print("chasing hero")
+--    end
+--  else
+--  print("no chase")
+--    chaseText.text = "Not chasing"
+--  end
   
 
   local bloodRage = me:GetAbility(1)
-  local enemies = entityList:GetEntities({type=LuaEntity.TYPE_HERO,team=me:GetEnemyTeam(),visible=true,alive=true})
-  print("one")
+  
   if me.alive and bloodRage and bloodRage.level > 0 and bloodRage.state == LuaEntityAbility.STATE_READY then
-  print("two")
-    for i, v in ipairs(enemies) do
-	print("three")
-      if v.health <= chaseHealth then
-	  print("four")
-        v = chaseVictim
+    print("two")
+    FindTarget()
+  end
+  
+  if chaseVictim and chaseVictim.visible and autoChase then
+    print("Five")
+    if GetDistance2D(me, v) <= me.attackRange-25 then
+      print("six")
+      if bloodRage and bloodRage.state == LuaEntityAbility.STATE_READY then
+        print("seven")
+        me:SafeCastAbility(bloodRage)
       end
-    end
-    if chaseVictim and chaseVictim.visible and autoChase then
-	print("Five")
-      if GetDistance2D(me, v) <= me.attackRange-25 then
-	  print("six")
-        if bloodRage and bloodRage.state == LuaEntityAbility.STATE_READY then
-		print("seven")
-          me:SafeCastAbility(bloodRage)
-        end
-        entityList:GetMyPlayer():Attack(chaseVictim)
-        Sleep(100)
-      else
-	  print("eight")
-        me:Move(chaseVictim.position)
-        Sleep(100)
-      end
+      entityList:GetMyPlayer():Attack(chaseVictim)
+      Sleep(100)
+    else
+      print("eight")
+      me:Move(chaseVictim.position)
+      Sleep(100)
     end
   end
 end
 
+function FindTarget()
+  local lowenemy = nil
+  local enemies = entityList:GetEntities({type=LuaEntity.TYPE_HERO,team=entityList:GetMyHero():GetEnemyTeam(),visible=true,alive=true})
+  print(enemies)
+  print("one")
+  for i, v in ipairs(enemies) do
+    print("three")
+    if v.health <= chaseHealth then
+	    if lowenemy == nil then
+		    lowenemy = v
+		    print("four with no low enemy")
+	    elseif lowenemy.health > v.health then
+		    lowenemy = v
+		    print("Four with lower enemy")
+	    end
+    end
+  end
+  lowenemy = chaseVictim
+end
+  
 function Load()
   if PlayingGame() then
     local me = entityList:GetMyHero()
