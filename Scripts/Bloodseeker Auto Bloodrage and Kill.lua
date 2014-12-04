@@ -70,7 +70,7 @@ function Tick(tick)
   
   if chaseVictim and chaseVictim.visible and autoChase then
     print("Five")
-    if GetDistance2D(me, v) <= me.attackRange-25 then
+    if GetDistance2D(me, chaseVictim) <= me.attackRange-25 then
       print("six")
       if bloodRage and bloodRage.state == LuaEntityAbility.STATE_READY then
         print("seven")
